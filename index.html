@@ -6,12 +6,17 @@
     <title>JPL Finance Tracker</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Added html2pdf.js for PDF generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
+        /* Updated body and layout for fixed, stable native-app-like UI */
         body {
             -webkit-tap-highlight-color: transparent;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
         }
         
         .no-scrollbar::-webkit-scrollbar {
@@ -29,8 +34,6 @@
             display: block;
         }
 
-        /* Removed all animations and transforms for UI stability */
-
         input:focus, select:focus {
             outline: none;
             ring: 2px;
@@ -39,7 +42,7 @@
 
         .toast {
             position: fixed;
-            bottom: 80px;
+            bottom: 90px;
             left: 50%;
             transform: translateX(-50%);
             background: #1f2937;
@@ -55,9 +58,10 @@
         .toast.error { background: #ef4444; }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800 h-screen flex flex-col overflow-hidden">
+<body class="bg-gray-50 text-gray-800">
 
-    <header class="bg-blue-600 text-white p-4 shadow-md z-10 flex justify-between items-center shrink-0">
+    <!-- Fixed header with specific height (60px) and z-index -->
+    <header class="fixed top-0 left-0 right-0 bg-blue-600 text-white shadow-md z-50 h-[60px] flex justify-between items-center px-4">
         <div>
             <h1 class="text-xl font-bold tracking-tight">JPL</h1>
             <p class="text-xs text-blue-100 opacity-80">Joymontop Premier League</p>
@@ -68,7 +72,8 @@
         </div>
     </header>
 
-    <main class="flex-1 overflow-y-auto no-scrollbar p-4 pb-24 relative">
+    <!-- Main content area with proper padding-top (60px for header) and padding-bottom (70px for nav), flex-1 and overflow-y-auto for scrolling -->
+    <main class="fixed top-[60px] left-0 right-0 bottom-[70px] overflow-y-auto no-scrollbar bg-gray-50 px-4 py-4">
         
         <!-- Dashboard View -->
         <div id="view-dashboard" class="view-section active">
@@ -138,16 +143,17 @@
                 Add Income
             </h2>
             
-            <form id="income-form" class="space-y-5">
+            <form id="income-form" class="space-y-4">
                 <div>
                     <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Amount (৳)</label>
-                    <!-- Removed transition-all for stability -->
-                    <input type="number" step="0.01" id="income-amount" required placeholder="0.00" class="w-full p-4 text-xl font-bold text-gray-800 bg-white border border-gray-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200">
+                    <!-- Reduced input height from p-4 text-xl to py-3 px-4 text-lg for compact standard mobile height -->
+                    <input type="number" step="0.01" id="income-amount" required placeholder="0.00" class="w-full py-3 px-4 text-lg font-bold text-gray-800 bg-white border border-gray-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200">
                 </div>
 
                 <div>
                     <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Source / Description</label>
-                    <input type="text" id="income-desc" required placeholder="e.g. Donation, Entry Fee" class="w-full p-4 text-gray-800 bg-white border border-gray-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200">
+                    <!-- Reduced input padding from p-4 to py-3 px-4 for standard mobile height -->
+                    <input type="text" id="income-desc" required placeholder="e.g. Donation, Entry Fee" class="w-full py-3 px-4 text-gray-800 bg-white border border-gray-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200">
                 </div>
 
                 <div>
@@ -155,7 +161,6 @@
                     <div class="grid grid-cols-2 gap-3">
                         <label class="relative cursor-pointer">
                             <input type="radio" name="income-account" value="cash" checked class="peer sr-only">
-                            <!-- Removed transition-all for stability -->
                             <div class="p-3 text-center border-2 border-gray-200 rounded-xl peer-checked:bg-green-50 peer-checked:border-green-500 peer-checked:text-green-700">
                                 <i data-lucide="wallet" class="w-5 h-5 mx-auto mb-1"></i>
                                 <span class="text-sm font-medium">Cash</span>
@@ -173,11 +178,12 @@
 
                 <div>
                     <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Date</label>
-                    <input type="date" id="income-date" required class="w-full p-4 text-gray-800 bg-white border border-gray-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200">
+                    <!-- Reduced input padding from p-4 to py-3 px-4 -->
+                    <input type="date" id="income-date" required class="w-full py-3 px-4 text-gray-800 bg-white border border-gray-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200">
                 </div>
 
-                <!-- Removed active:scale and shadow effects for stability -->
-                <button type="submit" class="w-full py-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl flex items-center justify-center gap-2">
+                <!-- Reduced button height from py-4 to py-3 for better proportions -->
+                <button type="submit" class="w-full py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl flex items-center justify-center gap-2">
                     <i data-lucide="check-circle" class="w-5 h-5"></i>
                     Save Income
                 </button>
@@ -193,15 +199,17 @@
                 Add Expense
             </h2>
             
-            <form id="expense-form" class="space-y-5">
+            <form id="expense-form" class="space-y-4">
                 <div>
                     <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Amount (৳)</label>
-                    <input type="number" step="0.01" id="expense-amount" required placeholder="0.00" class="w-full p-4 text-xl font-bold text-gray-800 bg-white border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200">
+                    <!-- Reduced input height to py-3 px-4 text-lg -->
+                    <input type="number" step="0.01" id="expense-amount" required placeholder="0.00" class="w-full py-3 px-4 text-lg font-bold text-gray-800 bg-white border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200">
                 </div>
 
                 <div>
                     <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Purpose / Description</label>
-                    <input type="text" id="expense-desc" required placeholder="e.g. Field Rent, Food" class="w-full p-4 text-gray-800 bg-white border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200">
+                    <!-- Reduced input padding to py-3 px-4 -->
+                    <input type="text" id="expense-desc" required placeholder="e.g. Field Rent, Food" class="w-full py-3 px-4 text-gray-800 bg-white border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200">
                 </div>
 
                 <div>
@@ -226,17 +234,19 @@
 
                 <div>
                     <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Date</label>
-                    <input type="date" id="expense-date" required class="w-full p-4 text-gray-800 bg-white border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200">
+                    <!-- Reduced input padding to py-3 px-4 -->
+                    <input type="date" id="expense-date" required class="w-full py-3 px-4 text-gray-800 bg-white border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200">
                 </div>
 
-                <button type="submit" class="w-full py-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl flex items-center justify-center gap-2">
+                <!-- Reduced button height to py-3 -->
+                <button type="submit" class="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl flex items-center justify-center gap-2">
                     <i data-lucide="check-circle" class="w-5 h-5"></i>
                     Save Expense
                 </button>
             </form>
         </div>
 
-        <!-- Added Transfer View -->
+        <!-- Transfer View -->
         <div id="view-transfer" class="view-section">
             <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
                 <div class="p-2 bg-purple-100 rounded-lg text-purple-600">
@@ -245,15 +255,17 @@
                 Fund Transfer
             </h2>
             
-            <form id="transfer-form" class="space-y-5">
+            <form id="transfer-form" class="space-y-4">
                 <div>
                     <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Amount (৳)</label>
-                    <input type="number" step="0.01" id="transfer-amount" required placeholder="0.00" class="w-full p-4 text-xl font-bold text-gray-800 bg-white border border-gray-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200">
+                    <!-- Reduced input height to py-3 px-4 text-lg -->
+                    <input type="number" step="0.01" id="transfer-amount" required placeholder="0.00" class="w-full py-3 px-4 text-lg font-bold text-gray-800 bg-white border border-gray-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200">
                 </div>
 
                 <div>
                     <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Description (Optional)</label>
-                    <input type="text" id="transfer-desc" placeholder="e.g. Fund Movement" class="w-full p-4 text-gray-800 bg-white border border-gray-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200">
+                    <!-- Reduced input padding to py-3 px-4 -->
+                    <input type="text" id="transfer-desc" placeholder="e.g. Fund Movement" class="w-full py-3 px-4 text-gray-800 bg-white border border-gray-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200">
                 </div>
 
                 <div>
@@ -286,10 +298,12 @@
 
                 <div>
                     <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Date</label>
-                    <input type="date" id="transfer-date" required class="w-full p-4 text-gray-800 bg-white border border-gray-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200">
+                    <!-- Reduced input padding to py-3 px-4 -->
+                    <input type="date" id="transfer-date" required class="w-full py-3 px-4 text-gray-800 bg-white border border-gray-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200">
                 </div>
 
-                <button type="submit" class="w-full py-4 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl flex items-center justify-center gap-2">
+                <!-- Reduced button height to py-3 -->
+                <button type="submit" class="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl flex items-center justify-center gap-2">
                     <i data-lucide="check-circle" class="w-5 h-5"></i>
                     Transfer Funds
                 </button>
@@ -318,9 +332,9 @@
         </div>
     </main>
 
-    <!-- Updated bottom navigation to include Transfer -->
-    <nav class="bg-white border-t border-gray-200 fixed bottom-0 w-full z-20 pb-safe">
-        <div class="flex justify-around items-center h-16">
+    <!-- Fixed bottom navigation with specific height (70px), fixed positioning and z-index -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 h-[70px] shadow-lg">
+        <div class="flex justify-around items-center h-full">
             <button onclick="switchView('dashboard')" class="nav-btn active flex flex-col items-center justify-center w-full h-full space-y-1 text-gray-400 hover:text-blue-600" data-target="dashboard">
                 <i data-lucide="layout-dashboard" class="w-6 h-6"></i>
                 <span class="text-[10px] font-medium">Dashboard</span>
