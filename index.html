@@ -6,14 +6,14 @@
     <title>JPL Finance Tracker</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Added html2pdf.js for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        /* Custom styles for mobile app feel */
         body {
             -webkit-tap-highlight-color: transparent;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
         
-        /* Hide scrollbar for clean look */
         .no-scrollbar::-webkit-scrollbar {
             display: none;
         }
@@ -22,35 +22,45 @@
             scrollbar-width: none;
         }
 
-        /* Smooth transitions */
         .view-section {
             display: none;
-            animation: fadeIn 0.2s ease-in-out;
         }
         .view-section.active {
             display: block;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(5px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        /* Removed all animations and transforms for UI stability */
 
-        /* Input styling focus */
         input:focus, select:focus {
             outline: none;
             ring: 2px;
             border-color: #3b82f6;
         }
+
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1f2937;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 1000;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+
+        .toast.success { background: #10b981; }
+        .toast.error { background: #ef4444; }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800 h-screen flex flex-col overflow-hidden">
 
-    <!-- Header -->
     <header class="bg-blue-600 text-white p-4 shadow-md z-10 flex justify-between items-center shrink-0">
         <div>
             <h1 class="text-xl font-bold tracking-tight">JPL</h1>
-            <p class="text-xs text-blue-100 opacity-80">Finance Tracker</p>
+            <p class="text-xs text-blue-100 opacity-80">Joymontop Premier League</p>
         </div>
         <div class="text-right">
             <p class="text-xs text-blue-100">Total Balance</p>
@@ -58,31 +68,27 @@
         </div>
     </header>
 
-    <!-- Main Content Area -->
     <main class="flex-1 overflow-y-auto no-scrollbar p-4 pb-24 relative">
         
         <!-- Dashboard View -->
         <div id="view-dashboard" class="view-section active">
             <div class="grid grid-cols-2 gap-3 mb-6">
-                <!-- Cash in Hand -->
                 <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
                     <div class="flex items-center gap-2 mb-2 text-gray-500">
                         <i data-lucide="wallet" class="w-4 h-4"></i>
-                        <span class="text-xs font-medium uppercase">Cash</span>
+                        <span class="text-xs font-medium uppercase">Cash in Hand</span>
                     </div>
                     <p class="text-lg font-bold text-gray-800" id="dashboard-cash">৳0</p>
                 </div>
-                <!-- Bank Deposit -->
                 <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
                     <div class="flex items-center gap-2 mb-2 text-gray-500">
                         <i data-lucide="landmark" class="w-4 h-4"></i>
-                        <span class="text-xs font-medium uppercase">Bank</span>
+                        <span class="text-xs font-medium uppercase">Bank Deposit</span>
                     </div>
                     <p class="text-lg font-bold text-gray-800" id="dashboard-bank">৳0</p>
                 </div>
             </div>
 
-            <!-- Monthly Overview -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 mb-6">
                 <h3 class="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
                     <i data-lucide="calendar" class="w-4 h-4"></i>
@@ -95,6 +101,7 @@
                             <span class="font-semibold text-green-600" id="month-income">৳0</span>
                         </div>
                         <div class="w-full bg-gray-100 rounded-full h-2">
+                            <!-- Removed transition-all for stability -->
                             <div id="bar-income" class="bg-green-500 h-2 rounded-full" style="width: 0%"></div>
                         </div>
                     </div>
@@ -104,20 +111,19 @@
                             <span class="font-semibold text-red-600" id="month-expense">৳0</span>
                         </div>
                         <div class="w-full bg-gray-100 rounded-full h-2">
+                            <!-- Removed transition-all for stability -->
                             <div id="bar-expense" class="bg-red-500 h-2 rounded-full" style="width: 0%"></div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Recent Activity Preview -->
             <div>
                 <div class="flex justify-between items-center mb-3">
                     <h3 class="text-sm font-semibold text-gray-700">Recent Activity</h3>
                     <button onclick="switchView('statement')" class="text-xs text-blue-600 font-medium">View All</button>
                 </div>
                 <div id="recent-transactions-list" class="space-y-3">
-                    <!-- Populated by JS -->
                     <p class="text-center text-gray-400 text-sm py-4">No recent transactions</p>
                 </div>
             </div>
@@ -135,12 +141,13 @@
             <form id="income-form" class="space-y-5">
                 <div>
                     <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Amount (৳)</label>
-                    <input type="number" id="income-amount" required placeholder="0.00" class="w-full p-4 text-xl font-bold text-gray-800 bg-white border border-gray-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all">
+                    <!-- Removed transition-all for stability -->
+                    <input type="number" step="0.01" id="income-amount" required placeholder="0.00" class="w-full p-4 text-xl font-bold text-gray-800 bg-white border border-gray-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200">
                 </div>
 
                 <div>
                     <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Source / Description</label>
-                    <input type="text" id="income-desc" required placeholder="e.g. Donation, Entry Fee" class="w-full p-4 text-gray-800 bg-white border border-gray-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all">
+                    <input type="text" id="income-desc" required placeholder="e.g. Donation, Entry Fee" class="w-full p-4 text-gray-800 bg-white border border-gray-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200">
                 </div>
 
                 <div>
@@ -148,14 +155,15 @@
                     <div class="grid grid-cols-2 gap-3">
                         <label class="relative cursor-pointer">
                             <input type="radio" name="income-account" value="cash" checked class="peer sr-only">
-                            <div class="p-3 text-center border border-gray-200 rounded-xl peer-checked:bg-green-50 peer-checked:border-green-500 peer-checked:text-green-700 transition-all">
+                            <!-- Removed transition-all for stability -->
+                            <div class="p-3 text-center border-2 border-gray-200 rounded-xl peer-checked:bg-green-50 peer-checked:border-green-500 peer-checked:text-green-700">
                                 <i data-lucide="wallet" class="w-5 h-5 mx-auto mb-1"></i>
                                 <span class="text-sm font-medium">Cash</span>
                             </div>
                         </label>
                         <label class="relative cursor-pointer">
                             <input type="radio" name="income-account" value="bank" class="peer sr-only">
-                            <div class="p-3 text-center border border-gray-200 rounded-xl peer-checked:bg-blue-50 peer-checked:border-blue-500 peer-checked:text-blue-700 transition-all">
+                            <div class="p-3 text-center border-2 border-gray-200 rounded-xl peer-checked:bg-blue-50 peer-checked:border-blue-500 peer-checked:text-blue-700">
                                 <i data-lucide="landmark" class="w-5 h-5 mx-auto mb-1"></i>
                                 <span class="text-sm font-medium">Bank</span>
                             </div>
@@ -165,10 +173,11 @@
 
                 <div>
                     <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Date</label>
-                    <input type="date" id="income-date" required class="w-full p-4 text-gray-800 bg-white border border-gray-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all">
+                    <input type="date" id="income-date" required class="w-full p-4 text-gray-800 bg-white border border-gray-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200">
                 </div>
 
-                <button type="submit" class="w-full py-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl shadow-lg shadow-green-200 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                <!-- Removed active:scale and shadow effects for stability -->
+                <button type="submit" class="w-full py-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl flex items-center justify-center gap-2">
                     <i data-lucide="check-circle" class="w-5 h-5"></i>
                     Save Income
                 </button>
@@ -187,12 +196,12 @@
             <form id="expense-form" class="space-y-5">
                 <div>
                     <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Amount (৳)</label>
-                    <input type="number" id="expense-amount" required placeholder="0.00" class="w-full p-4 text-xl font-bold text-gray-800 bg-white border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all">
+                    <input type="number" step="0.01" id="expense-amount" required placeholder="0.00" class="w-full p-4 text-xl font-bold text-gray-800 bg-white border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200">
                 </div>
 
                 <div>
                     <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Purpose / Description</label>
-                    <input type="text" id="expense-desc" required placeholder="e.g. Field Rent, Food" class="w-full p-4 text-gray-800 bg-white border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all">
+                    <input type="text" id="expense-desc" required placeholder="e.g. Field Rent, Food" class="w-full p-4 text-gray-800 bg-white border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200">
                 </div>
 
                 <div>
@@ -200,14 +209,14 @@
                     <div class="grid grid-cols-2 gap-3">
                         <label class="relative cursor-pointer">
                             <input type="radio" name="expense-account" value="cash" checked class="peer sr-only">
-                            <div class="p-3 text-center border border-gray-200 rounded-xl peer-checked:bg-red-50 peer-checked:border-red-500 peer-checked:text-red-700 transition-all">
+                            <div class="p-3 text-center border-2 border-gray-200 rounded-xl peer-checked:bg-red-50 peer-checked:border-red-500 peer-checked:text-red-700">
                                 <i data-lucide="wallet" class="w-5 h-5 mx-auto mb-1"></i>
                                 <span class="text-sm font-medium">Cash</span>
                             </div>
                         </label>
                         <label class="relative cursor-pointer">
                             <input type="radio" name="expense-account" value="bank" class="peer sr-only">
-                            <div class="p-3 text-center border border-gray-200 rounded-xl peer-checked:bg-red-50 peer-checked:border-red-500 peer-checked:text-red-700 transition-all">
+                            <div class="p-3 text-center border-2 border-gray-200 rounded-xl peer-checked:bg-red-50 peer-checked:border-red-500 peer-checked:text-red-700">
                                 <i data-lucide="landmark" class="w-5 h-5 mx-auto mb-1"></i>
                                 <span class="text-sm font-medium">Bank</span>
                             </div>
@@ -217,12 +226,72 @@
 
                 <div>
                     <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Date</label>
-                    <input type="date" id="expense-date" required class="w-full p-4 text-gray-800 bg-white border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all">
+                    <input type="date" id="expense-date" required class="w-full p-4 text-gray-800 bg-white border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200">
                 </div>
 
-                <button type="submit" class="w-full py-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-lg shadow-red-200 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                <button type="submit" class="w-full py-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl flex items-center justify-center gap-2">
                     <i data-lucide="check-circle" class="w-5 h-5"></i>
                     Save Expense
+                </button>
+            </form>
+        </div>
+
+        <!-- Added Transfer View -->
+        <div id="view-transfer" class="view-section">
+            <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                <div class="p-2 bg-purple-100 rounded-lg text-purple-600">
+                    <i data-lucide="arrow-left-right" class="w-6 h-6"></i>
+                </div>
+                Fund Transfer
+            </h2>
+            
+            <form id="transfer-form" class="space-y-5">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Amount (৳)</label>
+                    <input type="number" step="0.01" id="transfer-amount" required placeholder="0.00" class="w-full p-4 text-xl font-bold text-gray-800 bg-white border border-gray-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Description (Optional)</label>
+                    <input type="text" id="transfer-desc" placeholder="e.g. Fund Movement" class="w-full p-4 text-gray-800 bg-white border border-gray-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase mb-2">Transfer Type</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="relative cursor-pointer">
+                            <input type="radio" name="transfer-type" value="cash-to-bank" checked class="peer sr-only">
+                            <div class="p-3 text-center border-2 border-gray-200 rounded-xl peer-checked:bg-purple-50 peer-checked:border-purple-500 peer-checked:text-purple-700">
+                                <div class="flex items-center justify-center gap-1 mb-1">
+                                    <i data-lucide="wallet" class="w-4 h-4"></i>
+                                    <i data-lucide="arrow-right" class="w-3 h-3"></i>
+                                    <i data-lucide="landmark" class="w-4 h-4"></i>
+                                </div>
+                                <span class="text-xs font-medium">Cash to Bank</span>
+                            </div>
+                        </label>
+                        <label class="relative cursor-pointer">
+                            <input type="radio" name="transfer-type" value="bank-to-cash" class="peer sr-only">
+                            <div class="p-3 text-center border-2 border-gray-200 rounded-xl peer-checked:bg-purple-50 peer-checked:border-purple-500 peer-checked:text-purple-700">
+                                <div class="flex items-center justify-center gap-1 mb-1">
+                                    <i data-lucide="landmark" class="w-4 h-4"></i>
+                                    <i data-lucide="arrow-right" class="w-3 h-3"></i>
+                                    <i data-lucide="wallet" class="w-4 h-4"></i>
+                                </div>
+                                <span class="text-xs font-medium">Bank to Cash</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Date</label>
+                    <input type="date" id="transfer-date" required class="w-full p-4 text-gray-800 bg-white border border-gray-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200">
+                </div>
+
+                <button type="submit" class="w-full py-4 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl flex items-center justify-center gap-2">
+                    <i data-lucide="check-circle" class="w-5 h-5"></i>
+                    Transfer Funds
                 </button>
             </form>
         </div>
@@ -231,11 +300,14 @@
         <div id="view-statement" class="view-section">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-xl font-bold text-gray-800">Statement</h2>
-                <div class="text-xs font-medium bg-blue-50 text-blue-600 px-3 py-1 rounded-full">All History</div>
+                <!-- Added PDF Download button -->
+                <button onclick="generatePDF()" class="text-xs font-medium bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2">
+                    <i data-lucide="download" class="w-4 h-4"></i>
+                    Download PDF
+                </button>
             </div>
 
             <div id="statement-list" class="space-y-3">
-                <!-- Populated by JS -->
                 <div class="text-center py-10">
                     <div class="bg-gray-100 p-4 rounded-full inline-block mb-3">
                         <i data-lucide="scroll-text" class="w-8 h-8 text-gray-400"></i>
@@ -246,22 +318,26 @@
         </div>
     </main>
 
-    <!-- Bottom Navigation -->
+    <!-- Updated bottom navigation to include Transfer -->
     <nav class="bg-white border-t border-gray-200 fixed bottom-0 w-full z-20 pb-safe">
         <div class="flex justify-around items-center h-16">
-            <button onclick="switchView('dashboard')" class="nav-btn active flex flex-col items-center justify-center w-full h-full space-y-1 text-gray-400 hover:text-blue-600 transition-colors" data-target="dashboard">
+            <button onclick="switchView('dashboard')" class="nav-btn active flex flex-col items-center justify-center w-full h-full space-y-1 text-gray-400 hover:text-blue-600" data-target="dashboard">
                 <i data-lucide="layout-dashboard" class="w-6 h-6"></i>
                 <span class="text-[10px] font-medium">Dashboard</span>
             </button>
-            <button onclick="switchView('income')" class="nav-btn flex flex-col items-center justify-center w-full h-full space-y-1 text-gray-400 hover:text-green-600 transition-colors" data-target="income">
+            <button onclick="switchView('income')" class="nav-btn flex flex-col items-center justify-center w-full h-full space-y-1 text-gray-400 hover:text-green-600" data-target="income">
                 <i data-lucide="trending-up" class="w-6 h-6"></i>
                 <span class="text-[10px] font-medium">Income</span>
             </button>
-            <button onclick="switchView('expense')" class="nav-btn flex flex-col items-center justify-center w-full h-full space-y-1 text-gray-400 hover:text-red-600 transition-colors" data-target="expense">
+            <button onclick="switchView('expense')" class="nav-btn flex flex-col items-center justify-center w-full h-full space-y-1 text-gray-400 hover:text-red-600" data-target="expense">
                 <i data-lucide="trending-down" class="w-6 h-6"></i>
                 <span class="text-[10px] font-medium">Expense</span>
             </button>
-            <button onclick="switchView('statement')" class="nav-btn flex flex-col items-center justify-center w-full h-full space-y-1 text-gray-400 hover:text-blue-600 transition-colors" data-target="statement">
+            <button onclick="switchView('transfer')" class="nav-btn flex flex-col items-center justify-center w-full h-full space-y-1 text-gray-400 hover:text-purple-600" data-target="transfer">
+                <i data-lucide="arrow-left-right" class="w-6 h-6"></i>
+                <span class="text-[10px] font-medium">Transfer</span>
+            </button>
+            <button onclick="switchView('statement')" class="nav-btn flex flex-col items-center justify-center w-full h-full space-y-1 text-gray-400 hover:text-blue-600" data-target="statement">
                 <i data-lucide="scroll-text" class="w-6 h-6"></i>
                 <span class="text-[10px] font-medium">Statement</span>
             </button>
@@ -269,65 +345,92 @@
     </nav>
 
     <script>
-        // --- State Management ---
         const STORE_KEY = 'jpl_finance_data_v1';
         let transactions = JSON.parse(localStorage.getItem(STORE_KEY)) || [];
 
-        // --- Initialization ---
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 2000);
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
-            // Initialize Icons
             lucide.createIcons();
             
-            // Set default date to today for inputs
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('income-date').value = today;
             document.getElementById('expense-date').value = today;
+            document.getElementById('transfer-date').value = today;
 
-            // Initial Render
             updateDashboard();
             renderStatement();
         });
 
-        // --- Navigation Logic ---
         function switchView(viewId) {
-            // Hide all views
             document.querySelectorAll('.view-section').forEach(el => {
                 el.classList.remove('active');
             });
-            // Show target view
             document.getElementById(`view-${viewId}`).classList.add('active');
 
-            // Update Nav Active State
             document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('text-blue-600', 'text-green-600', 'text-red-600', 'active-nav');
+                btn.classList.remove('text-blue-600', 'text-green-600', 'text-red-600', 'text-purple-600', 'active-nav');
                 btn.classList.add('text-gray-400');
                 
-                // Add specific color for active state
                 if(btn.dataset.target === viewId) {
                     btn.classList.remove('text-gray-400');
                     if(viewId === 'income') btn.classList.add('text-green-600');
                     else if(viewId === 'expense') btn.classList.add('text-red-600');
+                    else if(viewId === 'transfer') btn.classList.add('text-purple-600');
                     else btn.classList.add('text-blue-600');
                 }
             });
 
-            // Refresh data if switching to dashboard or statement
             if(viewId === 'dashboard') updateDashboard();
             if(viewId === 'statement') renderStatement();
             
-            // Scroll to top
             document.querySelector('main').scrollTop = 0;
+            
+            // Reinitialize icons after view switch
+            setTimeout(() => lucide.createIcons(), 50);
         }
 
-        // --- Core Functions ---
+        function getCurrentBalances() {
+            let cashBalance = 0;
+            let bankBalance = 0;
+
+            transactions.forEach(t => {
+                if (t.type === 'income') {
+                    if (t.account === 'cash') cashBalance += t.amount;
+                    else bankBalance += t.amount;
+                } else if (t.type === 'expense') {
+                    if (t.account === 'cash') cashBalance -= t.amount;
+                    else bankBalance -= t.amount;
+                } else if (t.type === 'transfer') {
+                    if (t.transferType === 'cash-to-bank') {
+                        cashBalance -= t.amount;
+                        bankBalance += t.amount;
+                    } else {
+                        bankBalance -= t.amount;
+                        cashBalance += t.amount;
+                    }
+                }
+            });
+
+            return { cashBalance, bankBalance };
+        }
 
         function saveTransaction(type) {
-            const prefix = type; // 'income' or 'expense'
+            const prefix = type;
             const amount = parseFloat(document.getElementById(`${prefix}-amount`).value);
             const description = document.getElementById(`${prefix}-desc`).value;
             const date = document.getElementById(`${prefix}-date`).value;
             
-            // Get selected radio button value
             const accountRadios = document.getElementsByName(`${prefix}-account`);
             let account = 'cash';
             for(const radio of accountRadios) {
@@ -338,39 +441,98 @@
             }
 
             if (!amount || !description || !date) {
-                alert('Please fill in all fields');
+                showToast('Please fill in all fields', 'error');
                 return;
+            }
+
+            if (type === 'expense') {
+                const { cashBalance, bankBalance } = getCurrentBalances();
+                const currentBalance = account === 'cash' ? cashBalance : bankBalance;
+                
+                if (amount > currentBalance) {
+                    alert('Insufficient Balance!');
+                    return;
+                }
             }
 
             const newTransaction = {
                 id: Date.now(),
-                type: type, // 'income' or 'expense'
+                type: type,
                 amount: amount,
                 description: description,
-                account: account, // 'cash' or 'bank'
+                account: account,
                 date: date
             };
 
             transactions.push(newTransaction);
             saveToLocalStorage();
 
-            // Reset form
             document.getElementById(`${prefix}-form`).reset();
-            document.getElementById(`${prefix}-date`).value = new Date().toISOString().split('T')[0]; // Reset date to today
+            document.getElementById(`${prefix}-date`).value = new Date().toISOString().split('T')[0];
             
-            // Show success feedback (simple alert for now, could be toast)
-            // alert('Transaction saved!');
+            showToast(`${type === 'income' ? 'Income' : 'Expense'} saved successfully!`, 'success');
             
-            // Go back to dashboard
+            switchView('dashboard');
+        }
+
+        function saveTransfer() {
+            const amount = parseFloat(document.getElementById('transfer-amount').value);
+            const description = document.getElementById('transfer-desc').value || 'Fund Transfer';
+            const date = document.getElementById('transfer-date').value;
+            
+            const transferTypeRadios = document.getElementsByName('transfer-type');
+            let transferType = 'cash-to-bank';
+            for(const radio of transferTypeRadios) {
+                if(radio.checked) {
+                    transferType = radio.value;
+                    break;
+                }
+            }
+
+            if (!amount || !date) {
+                showToast('Please fill in all required fields', 'error');
+                return;
+            }
+
+            const { cashBalance, bankBalance } = getCurrentBalances();
+            const sourceBalance = transferType === 'cash-to-bank' ? cashBalance : bankBalance;
+            
+            if (amount > sourceBalance) {
+                alert('Insufficient Balance!');
+                return;
+            }
+
+            const newTransaction = {
+                id: Date.now(),
+                type: 'transfer',
+                amount: amount,
+                description: description,
+                transferType: transferType,
+                date: date
+            };
+
+            transactions.push(newTransaction);
+            saveToLocalStorage();
+
+            document.getElementById('transfer-form').reset();
+            document.getElementById('transfer-date').value = new Date().toISOString().split('T')[0];
+            
+            showToast('Transfer completed successfully!', 'success');
+            
             switchView('dashboard');
         }
 
         function deleteTransaction(id) {
-            if(confirm('Are you sure you want to delete this transaction?')) {
+            const userInput = prompt('Type "CONFIRM" to delete this record permanently:');
+            
+            if (userInput === 'CONFIRM') {
                 transactions = transactions.filter(t => t.id !== id);
                 saveToLocalStorage();
-                renderStatement(); // Re-render current view
-                updateDashboard(); // Update totals in background
+                renderStatement();
+                updateDashboard();
+                showToast('Transaction deleted', 'success');
+            } else if (userInput !== null) {
+                showToast('Delete cancelled - incorrect confirmation', 'error');
             }
         }
 
@@ -379,10 +541,8 @@
             updateDashboard();
         }
 
-        // --- Rendering Logic ---
-
         function formatCurrency(amount) {
-            return '৳' + amount.toLocaleString('en-IN');
+            return '৳' + amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
 
         function updateDashboard() {
@@ -397,114 +557,265 @@
             transactions.forEach(t => {
                 const tDate = new Date(t.date);
                 
-                // Calculate Balances
                 if (t.type === 'income') {
                     if (t.account === 'cash') totalCash += t.amount;
                     else totalBank += t.amount;
                     
-                    // Monthly Stats
                     if(tDate.getMonth() === currentMonth && tDate.getFullYear() === currentYear) {
                         monthlyIncome += t.amount;
                     }
-                } else {
+                } else if (t.type === 'expense') {
                     if (t.account === 'cash') totalCash -= t.amount;
                     else totalBank -= t.amount;
-
-                    // Monthly Stats
+                    
                     if(tDate.getMonth() === currentMonth && tDate.getFullYear() === currentYear) {
                         monthlyExpense += t.amount;
+                    }
+                } else if (t.type === 'transfer') {
+                    if (t.transferType === 'cash-to-bank') {
+                        totalCash -= t.amount;
+                        totalBank += t.amount;
+                    } else {
+                        totalBank -= t.amount;
+                        totalCash += t.amount;
                     }
                 }
             });
 
             const totalBalance = totalCash + totalBank;
 
-            // Update DOM
             document.getElementById('header-balance').textContent = formatCurrency(totalBalance);
             document.getElementById('dashboard-cash').textContent = formatCurrency(totalCash);
             document.getElementById('dashboard-bank').textContent = formatCurrency(totalBank);
-            
             document.getElementById('month-income').textContent = formatCurrency(monthlyIncome);
             document.getElementById('month-expense').textContent = formatCurrency(monthlyExpense);
 
-            // Update Progress Bars
-            const totalMonthly = monthlyIncome + monthlyExpense;
-            if(totalMonthly > 0) {
-                const incomePct = (monthlyIncome / totalMonthly) * 100;
-                const expensePct = (monthlyExpense / totalMonthly) * 100;
-                document.getElementById('bar-income').style.width = `${incomePct}%`;
-                document.getElementById('bar-expense').style.width = `${expensePct}%`;
-            } else {
-                document.getElementById('bar-income').style.width = `0%`;
-                document.getElementById('bar-expense').style.width = `0%`;
+            const maxAmount = Math.max(monthlyIncome, monthlyExpense, 1);
+            document.getElementById('bar-income').style.width = (monthlyIncome / maxAmount * 100) + '%';
+            document.getElementById('bar-expense').style.width = (monthlyExpense / maxAmount * 100) + '%';
+
+            renderRecentTransactions();
+        }
+
+        function renderRecentTransactions() {
+            const container = document.getElementById('recent-transactions-list');
+            const recent = [...transactions].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
+
+            if (recent.length === 0) {
+                container.innerHTML = '<p class="text-center text-gray-400 text-sm py-4">No recent transactions</p>';
+                return;
             }
 
-            // Render Recent Activity Preview (Last 3)
-            const recentTx = [...transactions].sort((a, b) => new Date(b.date) - new Date(a.date) || b.id - a.id).slice(0, 3);
-            const recentList = document.getElementById('recent-transactions-list');
-            
-            if(recentTx.length === 0) {
-                recentList.innerHTML = `<p class="text-center text-gray-400 text-xs py-2">No recent activity</p>`;
-            } else {
-                recentList.innerHTML = recentTx.map(t => createTransactionItem(t, false)).join('');
-            }
-            
-            // Re-init icons for newly added elements
+            container.innerHTML = recent.map(t => {
+                const isIncome = t.type === 'income';
+                const isTransfer = t.type === 'transfer';
+                
+                let iconName = isIncome ? 'trending-up' : (isTransfer ? 'arrow-left-right' : 'trending-down');
+                let colorClass = isIncome ? 'bg-green-50 text-green-600' : (isTransfer ? 'bg-purple-50 text-purple-600' : 'bg-red-50 text-red-600');
+                let amountColor = isIncome ? 'text-green-600' : (isTransfer ? 'text-purple-600' : 'text-red-600');
+                let accountText = isTransfer 
+                    ? (t.transferType === 'cash-to-bank' ? 'Cash → Bank' : 'Bank → Cash')
+                    : (t.account === 'cash' ? 'Cash' : 'Bank');
+                
+                return `
+                    <div class="bg-white p-4 rounded-lg border border-gray-100 flex justify-between items-center">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 rounded-lg ${colorClass}">
+                                <i data-lucide="${iconName}" class="w-4 h-4"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-800 text-sm">${t.description}</p>
+                                <p class="text-xs text-gray-500">${new Date(t.date).toLocaleDateString('en-GB')} • ${accountText}</p>
+                            </div>
+                        </div>
+                        <p class="font-bold ${amountColor}">
+                            ${isIncome ? '+' : (isTransfer ? '' : '-')}${formatCurrency(t.amount)}
+                        </p>
+                    </div>
+                `;
+            }).join('');
+
             lucide.createIcons();
         }
 
         function renderStatement() {
-            const listEl = document.getElementById('statement-list');
-            const sortedTx = [...transactions].sort((a, b) => new Date(b.date) - new Date(a.date) || b.id - a.id);
+            const container = document.getElementById('statement-list');
+            const sorted = [...transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
 
-            if (sortedTx.length === 0) {
-                listEl.innerHTML = `
-                    <div class="text-center py-10 flex flex-col items-center">
-                        <div class="bg-gray-100 p-4 rounded-full mb-3">
-                            <i data-lucide="inbox" class="w-8 h-8 text-gray-400"></i>
+            if (sorted.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-10">
+                        <div class="bg-gray-100 p-4 rounded-full inline-block mb-3">
+                            <i data-lucide="scroll-text" class="w-8 h-8 text-gray-400"></i>
                         </div>
-                        <p class="text-gray-500">No transactions recorded yet.</p>
-                    </div>`;
-            } else {
-                listEl.innerHTML = sortedTx.map(t => createTransactionItem(t, true)).join('');
+                        <p class="text-gray-500">No transactions found.</p>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
             }
+
+            container.innerHTML = sorted.map(t => {
+                const isIncome = t.type === 'income';
+                const isTransfer = t.type === 'transfer';
+                
+                let iconName = isIncome ? 'trending-up' : (isTransfer ? 'arrow-left-right' : 'trending-down');
+                let colorClass = isIncome ? 'bg-green-50 text-green-600' : (isTransfer ? 'bg-purple-50 text-purple-600' : 'bg-red-50 text-red-600');
+                let amountColor = isIncome ? 'text-green-600' : (isTransfer ? 'text-purple-600' : 'text-red-600');
+                let badgeClass = isTransfer 
+                    ? 'bg-purple-50 text-purple-700'
+                    : (t.account === 'cash' ? 'bg-amber-50 text-amber-700' : 'bg-blue-50 text-blue-700');
+                let badgeText = isTransfer 
+                    ? (t.transferType === 'cash-to-bank' ? 'Cash → Bank' : 'Bank → Cash')
+                    : (t.account === 'cash' ? 'Cash' : 'Bank');
+                
+                return `
+                    <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="flex items-center gap-3">
+                                <div class="p-2 rounded-lg ${colorClass}">
+                                    <i data-lucide="${iconName}" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-gray-800">${t.description}</p>
+                                    <p class="text-xs text-gray-500">${new Date(t.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                                </div>
+                            </div>
+                            <button onclick="deleteTransaction(${t.id})" class="text-gray-400 hover:text-red-500 p-1">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                        <div class="flex justify-between items-center pl-11">
+                            <span class="text-xs font-medium px-2 py-1 rounded ${badgeClass}">
+                                ${badgeText}
+                            </span>
+                            <p class="font-bold text-lg ${amountColor}">
+                                ${isIncome ? '+' : (isTransfer ? '' : '-')}${formatCurrency(t.amount)}
+                            </p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
             lucide.createIcons();
         }
 
-        function createTransactionItem(t, showDelete) {
-            const isIncome = t.type === 'income';
-            const colorClass = isIncome ? 'text-green-600' : 'text-red-600';
-            const bgClass = isIncome ? 'bg-green-50' : 'bg-red-50';
-            const icon = isIncome ? 'arrow-down-left' : 'arrow-up-right';
-            const sign = isIncome ? '+' : '-';
+        function generatePDF() {
+            if (transactions.length === 0) {
+                showToast('No transactions to export', 'error');
+                return;
+            }
 
-            return `
-                <div class="bg-white p-3 rounded-xl border border-gray-100 shadow-sm flex items-center justify-between group">
-                    <div class="flex items-center gap-3">
-                        <div class="p-2 rounded-full ${bgClass} ${colorClass}">
-                            <i data-lucide="${icon}" class="w-4 h-4"></i>
-                        </div>
-                        <div>
-                            <p class="text-sm font-semibold text-gray-800">${t.description}</p>
-                            <div class="flex items-center gap-2 text-xs text-gray-500">
-                                <span>${new Date(t.date).toLocaleDateString()}</span>
-                                <span>•</span>
-                                <span class="uppercase px-1.5 py-0.5 rounded bg-gray-100 text-[10px] font-medium tracking-wide">${t.account}</span>
+            const { cashBalance, bankBalance } = getCurrentBalances();
+            let totalIncome = 0;
+            let totalExpense = 0;
+
+            transactions.forEach(t => {
+                if (t.type === 'income') totalIncome += t.amount;
+                else if (t.type === 'expense') totalExpense += t.amount;
+            });
+
+            const sorted = [...transactions].sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            const now = new Date();
+            const dateTime = now.toLocaleString('en-GB', { 
+                day: '2-digit', 
+                month: 'short', 
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            const pdfContent = `
+                <div style="padding: 40px; font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; background: white;">
+                    <div style="text-align: center; margin-bottom: 30px; border-bottom: 3px solid #2563eb; padding-bottom: 20px;">
+                        <h1 style="font-size: 28px; font-weight: bold; color: #1e40af; margin: 0;">JPL Financial Statement</h1>
+                        <p style="font-size: 14px; color: #64748b; margin: 5px 0;">Joymontop Premier League</p>
+                        <p style="font-size: 12px; color: #94a3b8; margin: 5px 0;">Generated on: ${dateTime}</p>
+                    </div>
+
+                    <div style="background: #f1f5f9; border: 2px solid #cbd5e1; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
+                        <h2 style="font-size: 16px; font-weight: bold; color: #334155; margin: 0 0 15px 0;">Summary</h2>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div>
+                                <p style="font-size: 12px; color: #64748b; margin: 0;">Total Income</p>
+                                <p style="font-size: 18px; font-weight: bold; color: #16a34a; margin: 5px 0;">৳${totalIncome.toFixed(2)}</p>
+                            </div>
+                            <div>
+                                <p style="font-size: 12px; color: #64748b; margin: 0;">Total Expense</p>
+                                <p style="font-size: 18px; font-weight: bold; color: #dc2626; margin: 5px 0;">৳${totalExpense.toFixed(2)}</p>
+                            </div>
+                            <div>
+                                <p style="font-size: 12px; color: #64748b; margin: 0;">Net Cash Balance</p>
+                                <p style="font-size: 18px; font-weight: bold; color: #0284c7; margin: 5px 0;">৳${cashBalance.toFixed(2)}</p>
+                            </div>
+                            <div>
+                                <p style="font-size: 12px; color: #64748b; margin: 0;">Net Bank Balance</p>
+                                <p style="font-size: 18px; font-weight: bold; color: #0284c7; margin: 5px 0;">৳${bankBalance.toFixed(2)}</p>
                             </div>
                         </div>
                     </div>
-                    <div class="flex items-center gap-3">
-                        <span class="font-bold ${colorClass}">${sign}${formatCurrency(t.amount)}</span>
-                        ${showDelete ? `
-                        <button onclick="deleteTransaction(${t.id})" class="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
-                            <i data-lucide="trash-2" class="w-4 h-4"></i>
-                        </button>` : ''}
+
+                    <h2 style="font-size: 16px; font-weight: bold; color: #334155; margin: 0 0 15px 0;">Transaction Details</h2>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+                        <thead>
+                            <tr style="background: #1e40af; color: white;">
+                                <th style="padding: 10px; text-align: left; border: 1px solid #cbd5e1;">Date</th>
+                                <th style="padding: 10px; text-align: left; border: 1px solid #cbd5e1;">Description</th>
+                                <th style="padding: 10px; text-align: center; border: 1px solid #cbd5e1;">Type</th>
+                                <th style="padding: 10px; text-align: center; border: 1px solid #cbd5e1;">Mode</th>
+                                <th style="padding: 10px; text-align: right; border: 1px solid #cbd5e1;">Amount (৳)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${sorted.map((t, index) => {
+                                const bgColor = index % 2 === 0 ? '#ffffff' : '#f8fafc';
+                                const typeText = t.type === 'income' ? 'Income' : (t.type === 'transfer' ? 'Transfer' : 'Expense');
+                                const modeText = t.type === 'transfer' 
+                                    ? (t.transferType === 'cash-to-bank' ? 'C→B' : 'B→C')
+                                    : (t.account === 'cash' ? 'Cash' : 'Bank');
+                                const amountColor = t.type === 'income' ? '#16a34a' : (t.type === 'transfer' ? '#9333ea' : '#dc2626');
+                                
+                                return `
+                                    <tr style="background: ${bgColor};">
+                                        <td style="padding: 10px; border: 1px solid #e2e8f0;">${new Date(t.date).toLocaleDateString('en-GB')}</td>
+                                        <td style="padding: 10px; border: 1px solid #e2e8f0;">${t.description}</td>
+                                        <td style="padding: 10px; text-align: center; border: 1px solid #e2e8f0;">${typeText}</td>
+                                        <td style="padding: 10px; text-align: center; border: 1px solid #e2e8f0;">${modeText}</td>
+                                        <td style="padding: 10px; text-align: right; border: 1px solid #e2e8f0; color: ${amountColor}; font-weight: bold;">
+                                            ${t.type === 'income' ? '+' : (t.type === 'transfer' ? '' : '-')}${t.amount.toFixed(2)}
+                                        </td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+
+                    <div style="margin-top: 50px; padding-top: 20px; border-top: 2px solid #cbd5e1;">
+                        <p style="font-size: 12px; color: #64748b; margin: 0;">Authorized Signature</p>
+                        <div style="height: 40px; border-bottom: 1px solid #94a3b8; width: 250px; margin-top: 30px;"></div>
                     </div>
                 </div>
             `;
+
+            const element = document.createElement('div');
+            element.innerHTML = pdfContent;
+            document.body.appendChild(element);
+
+            const opt = {
+                margin: 10,
+                filename: `JPL_Statement_${now.getTime()}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                document.body.removeChild(element);
+                showToast('PDF downloaded successfully!', 'success');
+            });
         }
 
-        // --- Event Listeners ---
         document.getElementById('income-form').addEventListener('submit', (e) => {
             e.preventDefault();
             saveTransaction('income');
@@ -515,6 +826,10 @@
             saveTransaction('expense');
         });
 
+        document.getElementById('transfer-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            saveTransfer();
+        });
     </script>
 </body>
 </html>
